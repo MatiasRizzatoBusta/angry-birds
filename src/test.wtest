@@ -1,0 +1,94 @@
+import pajaros.*
+import eventos.*
+import islas.*
+import obstaculos.*
+
+const huevo1 = new Huevo(peso = 4)
+const huevo2 = new Huevo(peso = 2)
+const red = new Red(fuerza = 10, ira = 11,vecesQueSeEnojo = 2)
+const bomb = new Bomb(fuerza = 15,ira = 10)
+const chuck = new Chuck(fuerza = 15,ira = 10,velocidad = 85)
+const terence = new Terence(fuerza = 10,ira = 15,vecesQueSeEnojo = 0,multiplicador = 2)
+const matilda = new Matilda(fuerza = 20,ira = 23,huevos = [huevo1,huevo2])
+const unaIsla = new Isla(pajarosQueLaHabitan = [red,bomb,terence,chuck,matilda])
+const unaSesion = new SesionDeManejoDeIra()
+const invasion = new InvasionDeCerditos(invasores = 200)
+const fiesta = new FiestaSorpresa(homenajeados = [red,bomb,terence])
+const serieDeEventos = new SerieDeEventosDesafortunados(listaDeEventos = [unaSesion,invasion,fiesta])
+
+describe "test de los pajaros"{
+	
+	test "Obtengo la fuerza de un pajaro"{
+		assert.equals(220,red.fuerza())
+	}
+	
+	test "Hago enojar a un pajaro"{
+		chuck.enojarse()
+		assert.equals(170,chuck.velocidad())
+	}
+	
+	test "Obtengo a los pajaros fuertes de la isla"{
+		matilda.enojarse()
+		assert.equals([red,chuck,matilda],unaIsla.pajarosFuertes())
+	}
+	
+	test " obtengo la fuerza de una isla"{
+		assert.equals(447,unaIsla.fuerzaIsla())
+	}
+	
+}
+
+describe "test de los eventos"{
+	test "sucede una sesion"{
+		unaSesion.aplicarse(unaIsla)
+		assert.equals(6,red.ira()) //pruebo este y chuck.si andan esos es pq todos andan bien.
+		assert.equals(10,chuck.ira())
+	}
+	
+	test "sucede una invasion"{
+		invasion.aplicarse(unaIsla)
+		assert.equals(4,red.vecesQueSeEnojo()) //porque se enoja 2 veces mas
+		assert.equals(440,red.fuerza())
+	}
+	
+	test "sucede una fiesta"{
+		fiesta.aplicarse(unaIsla)
+		assert.equals(3,red.vecesQueSeEnojo()) //se enoja una vez
+	}
+	
+	test "suceden una serie de eventos desafortunados"{
+		serieDeEventos.aplicarse(unaIsla)
+		assert.equals(6,red.ira()) //sucede la sesion
+		assert.equals(5,red.vecesQueSeEnojo()) // se enoja una vez por la fiesta y dos por la invasion mas las 2 que ya tenia
+	}
+}
+
+describe "test de una guerra"{
+	const paredDeVidrio = new ParedDeVidrio(ancho = 2)
+	const paredDePiedra = new ParedDePiedra(ancho = 6)
+	const casco1 = new Arma(resistenciaArma = 7)
+	const escudo1 = new Arma(resistenciaArma = 10)
+	const cerdoConCasco = new CerditoArmado(arma = casco1)
+	const cerdoConEscudo = new CerditoArmado(arma = escudo1)
+	const islaPorcina = new IslaPorcina(obstaculos = [paredDeVidrio,paredDePiedra,cerdoConCasco,cerdoConEscudo])
+	
+	test "un pajaro derriba un obstaculo"{
+		assert.equals(true,cerdoConCasco.esDestruido(chuck))
+		
+	}
+	
+	test "un pajaro ataca a la isla porcina"{
+		unaIsla.usarUnPajaro(red,islaPorcina)
+		assert.equals([paredDePiedra,cerdoConCasco,cerdoConEscudo],islaPorcina.obstaculos())
+		assert.equals([bomb,terence,chuck,matilda],unaIsla.pajarosQueLaHabitan())
+	}
+	
+	test "los pajaros no recuperan los huevos"{
+		unaIsla.atacarUnaIsla(islaPorcina)
+		assert.equals(false,unaIsla.recuperaronLosHuevos(islaPorcina))
+	}
+}
+
+
+
+
